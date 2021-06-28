@@ -1,6 +1,6 @@
 import { isEmpty, isObject, properObject } from '../utils';
 
-const addedDiff = (lhs, rhs) => {
+const addedDiff = (lhs, rhs, uniqueProperty = "id") => {
 
   if (lhs === rhs || !isObject(lhs) || !isObject(rhs)) return {};
 
@@ -8,15 +8,27 @@ const addedDiff = (lhs, rhs) => {
   const r = properObject(rhs);
 
   return Object.keys(r).reduce((acc, key) => {
-    if (l.hasOwnProperty(key)) {
-      const difference = addedDiff(l[key], r[key]);
+    if (r.hasOwnProperty(key) && !Array.isArray(l) && !Array.isArray(r)) {
+      const difference = deletedDiff(l[key], r[key]);
+
+      if (isObject(difference) && isEmpty(difference)) return acc;
+
+      return { ...acc, [key]: difference };
+    } else if (Array.isArray(l) && Array.isArray(r)) {
+      const lId = l[key][uniqueProperty];
+
+      const rItem = r.find((i) => i.id === lId);
+
+      if (!rItem) return { ...acc, [key]: {id: lId} };
+
+      const difference = deletedDiff(l[key], rItem);
 
       if (isObject(difference) && isEmpty(difference)) return acc;
 
       return { ...acc, [key]: difference };
     }
 
-    return { ...acc, [key]: r[key] };
+    return { ...acc, [key]: undefined };
   }, {});
 };
 
