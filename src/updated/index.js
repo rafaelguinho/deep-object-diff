@@ -1,6 +1,6 @@
 import { isDate, isEmpty, isObject, properObject } from '../utils';
 
-const updatedDiff = (lhs, rhs) => {
+const updatedDiff = (lhs, rhs, uniqueProperty = "id") => {
 
   if (lhs === rhs) return {};
 
@@ -24,9 +24,9 @@ const updatedDiff = (lhs, rhs) => {
       return { ...acc, [key]: difference };
     }
     else if (Array.isArray(l) && Array.isArray(r)) {
-      const rId = r[key].id;
+      const rId = r[key][uniqueProperty];
 
-      const lItem = l.find((i) => i.id === rId);
+      const lItem = l.find((i) => i[uniqueProperty] === rId);
 
       if(!lItem) return acc;
 

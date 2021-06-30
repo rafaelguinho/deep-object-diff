@@ -8,27 +8,28 @@ const addedDiff = (lhs, rhs, uniqueProperty = "id") => {
   const r = properObject(rhs);
 
   return Object.keys(r).reduce((acc, key) => {
-    if (r.hasOwnProperty(key) && !Array.isArray(l) && !Array.isArray(r)) {
-      const difference = deletedDiff(l[key], r[key]);
-
-      if (isObject(difference) && isEmpty(difference)) return acc;
-
-      return { ...acc, [key]: difference };
-    } else if (Array.isArray(l) && Array.isArray(r)) {
-      const lId = l[key][uniqueProperty];
-
-      const rItem = r.find((i) => i.id === lId);
-
-      if (!rItem) return { ...acc, [key]: {id: lId} };
-
-      const difference = deletedDiff(l[key], rItem);
+    if (l.hasOwnProperty(key) && !Array.isArray(l) && !Array.isArray(r)) {
+      const difference = addedDiff(l[key], r[key]);
 
       if (isObject(difference) && isEmpty(difference)) return acc;
 
       return { ...acc, [key]: difference };
     }
+    else if (Array.isArray(l) && Array.isArray(r)) {
+        const rId = r[key][uniqueProperty];
+  
+        const lItem = l.find((i) => i[uniqueProperty] === rId);
+  
+        if (!lItem) return { ...acc, [key]: r[key] };
+  
+        const difference = addedDiff(lItem, r[key]);
+  
+        if (isObject(difference) && isEmpty(difference)) return acc;
+  
+        return { ...acc, [key]: difference };
+      }
 
-    return { ...acc, [key]: undefined };
+    return { ...acc, [key]: r[key] };
   }, {});
 };
 
